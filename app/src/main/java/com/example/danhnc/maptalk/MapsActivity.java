@@ -1,9 +1,8 @@
 package com.example.danhnc.maptalk;
 
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.Signature;
+import android.graphics.Point;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -25,10 +24,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import static android.R.attr.fragment;
+
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -37,15 +37,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ImageView imgSearch;
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     Button taoFragment;
+    String x = "Chua co toa do" ;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
 
         //set sư kiện click cho button search
         iniView();
@@ -55,6 +59,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 frag = new PositionFragment();
+                //Bundle bundle= new Bundle();
+                //bundle.putString("toa do ", x);
+                //frag.setArguments(bundle);
                 FragmentManager manager = getSupportFragmentManager();
                 FragmentTransaction transaction = manager.beginTransaction();
 
@@ -67,6 +74,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
     }
+
+
 
 
     private void iniView(){
@@ -89,7 +98,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     };
-
 
 
     @Override
@@ -123,20 +131,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
         if (ContextCompat.checkSelfPermission(MapsActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
             mMap.setMyLocationEnabled(true);
         }
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                mMap.addMarker(new MarkerOptions().position(latLng).title("ahiahiahi").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,14));
+                changeOffsetCenter(latLng.latitude,latLng.longitude);
+                Toast.makeText(MapsActivity.this, latLng.toString(), Toast.LENGTH_SHORT).show();
+
+                frag = new PositionFragment();
+                FragmentManager fragmentmanager = getSupportFragmentManager();
+                FragmentTransaction transaction = fragmentmanager.beginTransaction();
+                transaction.replace(R.id.flPosition,frag);
+                transaction.commit();
+            }
+        });
     }
 
-    public void callFragment(Fragment fragment){
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-
-        transaction.replace(R.id.flPosition,fragment);
-        transaction.commit();
+    public void changeOffsetCenter(double latitude, double longtitude){
+        Point mapPoint = mMap.getProjection().toScreenLocation(new LatLng(latitude,longtitude));
+        mapPoint.set(mapPoint.x-30,mapPoint.y+550);
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(mMap.getProjection().fromScreenLocation(mapPoint)));
     }
 }
