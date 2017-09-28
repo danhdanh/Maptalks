@@ -3,6 +3,6 @@
     <string name="title_activity_maps">MapTalks</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="fragment_1">Rating</string>
-    <string name="fragment_2">Comment</string>
+    <string name="fragment_1">Infomation</string>
+    <string name="fragment_2">Rating/Comment</string>
 </resources>
